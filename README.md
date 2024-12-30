@@ -64,6 +64,7 @@ Make sure you have a `.env` file in the `backend` directory with the following c
 ```
 MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/<dbname>
 SECRET_KEY=someRandomStringForJWT
+PORT=5000
 ```
 
 - Replace `<username>` , `<password>` and `<dbname>`with your MongoDB credentials.
