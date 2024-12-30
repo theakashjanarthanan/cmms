@@ -1,0 +1,422 @@
+/* frontend\src\components\DashboardPage.css */
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Global table styling */
+
+/* Styling for elements with the class "card p-4" */
+/* Styling for the outer page background */
+body {
+  background-color: #F5F7F8 ; /* Light, neutral tone for modern appearance */
+  margin: 0;
+  font-family: Arial, sans-serif; /* Ensure consistency in typography */
+}
+
+/* Styling for elements with the class "card p-4" */
+.card.p-4 {
+  background-color: #ffffff; /* Crisp white for the card */
+  border-radius: 10px; /* Smooth corners for the card */
+  padding: 20px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), /* Deepened main shadow */
+              0 6px 12px rgba(0, 0, 0, 0.15); /* Additional soft shadow for a layered effect */
+}
+
+
+.table {
+font-size: 14px;
+border-collapse: collapse;
+width: 100%;
+}
+
+/* Table headers styling */
+.table th {
+background-color: #f8f9fa;
+color: #495057;
+text-align: left;
+padding: 10px;
+}
+
+/* Table cells styling */
+.table td {
+padding: 12px;
+vertical-align: middle;
+border: 1px solid #dee2e6;
+}
+
+/* Status badges styles */
+.badge {
+padding: 5px 10px;
+font-size: 12px;
+font-weight: bold;
+border-radius: 50px;
+color: #fff;
+text-transform: capitalize;
+}
+
+/* Status Badge Colors */
+.badge.bg-primary {
+background-color: #007bff;
+}
+.badge.bg-info {
+background-color: #17a2b8;
+}
+.badge.bg-success {
+background-color: #28a745;
+}
+
+/* Priority Badge Styles */
+.list-group-item-success,
+.list-group-item-warning,
+.list-group-item-danger {
+display: inline-block;
+padding: 6px 12px;
+font-size: 12px;
+font-weight: bold;
+border-radius: 20px;
+color: white;
+text-transform: capitalize;
+}
+
+/* Priority Badge Colors */
+.list-group-item-success {
+background-color: #28a745;
+}
+.list-group-item-warning {
+background-color: #ffc107;
+}
+.list-group-item-danger {
+background-color: #dc3545;
+}
+
+/* Hover Effect on Table Rows */
+.table tbody tr {
+transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition for background and transform */
+}
+
+.table tbody tr:hover {
+background-color: #f1f1f1; /* Light grey background on hover */
+cursor: pointer;
+transform: scale(1.02); /* Slight zoom effect on row hover */
+}
+
+/* Hover Effect for Status and Priority Badges */
+.badge:hover, 
+.list-group-item-success:hover, 
+.list-group-item-warning:hover, 
+.list-group-item-danger:hover {
+opacity: 0.8; /* Slightly fade the badges on hover */
+cursor: pointer;
+}
+
+/* Work Order Row Color based on Priority and Status */
+.table td button {
+transition: transform 0.2s ease;
+}
+
+.table td button:hover {
+transform: scale(1.05); /* Slightly enlarge buttons on hover */
+}
+
+
+/* Styling for module-box */
+/* Container for the module boxes */
+.module-row {
+display: flex;
+justify-content: space-between;
+gap: 20px; /* Add space between the boxes */
+flex-wrap: wrap; /* Ensure boxes wrap on smaller screens */
+margin-top: 30px;
+}
+
+/* Styling for each module-box */
+.module-box {
+background-color: #fff;
+border-radius: 15px;
+padding: 20px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+width: 48%; /* Adjust width to fit two boxes per row */
+transition: all 0.3s ease-in-out;
+cursor: pointer;
+text-align: center;
+position: relative; /* For positioning icon inside the box */
+min-height: 250px; /* Minimum height for uniform box size */
+}
+
+.module-box:hover {
+transform: translateY(-10px);
+box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.module-box h5 {
+font-size: 1.3rem;
+font-weight: 700;
+color: #333;
+margin-bottom: 10px;
+}
+
+.module-box p {
+font-size: 1rem;
+color: #555;
+margin-bottom: 15px;
+}
+
+.module-box .btn {
+border-radius: 20px;
+padding: 10px 20px;
+font-size: 1rem;
+transition: background-color 0.3s;
+}
+
+.module-box .btn-success {
+background-color: #28a745;
+border: none;
+}
+
+.module-box .btn-success:hover {
+background-color: #218838;
+}
+
+.module-box .work-order-stats p {
+font-size: 0.9rem;
+color: #444;
+margin: 5px 0;
+}
+
+/* Add icons before text */
+.module-box i {
+font-size: 2rem;
+color: #007bff;
+margin-right: 10px;
+vertical-align: middle;
+}
+
+/* Add icons for specific modules */
+.module-box .work-orders-icon {
+color: #28a745; /* Green for work orders */
+}
+
+.module-box .maintenance-icon {
+color: #ff9900; /* Orange for maintenance */
+}
+
+.module-box .assets-icon {
+color: #007bff; /* Blue for asset management */
+}
+
+.module-box .requests-icon {
+color: #dc3545; /* Red for requests */
+}
+
+/* Title and description styles */
+.module-box .module-title {
+font-size: 1.3rem;
+font-weight: 700;
+margin-top: 10px;
+}
+
+.module-box .module-description {
+font-size: 1rem;
+color: #777;
+margin-top: 5px;
+}
+
+/* Icon and text container */
+.module-box .icon-text {
+display: flex;
+align-items: center;
+justify-content: center;
+margin-bottom: 10px;
+}
+
+
+/* Responsiveness for smaller screens */
+@media screen and (max-width: 768px) {
+.module-box {
+  width: 100%; /* Stack the boxes in a single column on small screens */
+}
+}
+
+.count {
+display: inline-block;
+font-weight: 700;
+font-size: 1.2rem;
+color: #007bff;
+transition: all 1s ease-in-out;
+}  
+
+
+/*  */
+
+/* Input Field Styling */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+/* Input Hover Effect */
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="email"]:hover,
+input[type="number"]:hover,
+textarea:hover {
+  border-color: #007bff; /* Highlight border color on hover */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4); /* Subtle glow effect */
+}
+
+/* Focus Effect (when the input field is focused) */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: #007bff; /* Highlight border color on focus */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4); /* Subtle glow effect */
+  animation: pulse 1s infinite; /* Pulse animation */
+}
+
+/* Animation for Pulse Effect */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(0, 123, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+  }
+}
+
+/* Error Input Styling */
+input[type="text"].error,
+input[type="password"].error,
+input[type="email"].error,
+input[type="number"].error,
+textarea.error {
+  border-color: #dc3545; /* Red border for error */
+  background-color: #f8d7da; /* Light red background */
+}
+
+input[type="text"].error:focus,
+input[type="password"].error:focus,
+input[type="email"].error:focus,
+input[type="number"].error:focus,
+textarea.error:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 8px rgba(220, 53, 69, 0.4); /* Red glow effect on error */
+}
+
+/* Success Input Styling */
+input[type="text"].success,
+input[type="password"].success,
+input[type="email"].success,
+input[type="number"].success,
+textarea.success {
+  border-color: #28a745; /* Green border for success */
+  background-color: #d4edda; /* Light green background */
+}
+
+input[type="text"].success:focus,
+input[type="password"].success:focus,
+input[type="email"].success:focus,
+input[type="number"].success:focus,
+textarea.success:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 8px rgba(40, 167, 69, 0.4); /* Green glow effect on success */
+}
+
+.btn {
+  transition: box-shadow 0.3s ease;
+}
+
+.btn:hover {
+  box-shadow: 0px 0px 15px rgba(0, 255, 255, 0.8);
+}
+
+/* Navbar */
+/* Hover Effect */
+.btn:hover {
+  transform: scale(1.05); /* Slightly scale up the button */
+  transition: transform 0.3s ease; /* Smooth animation for scaling */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
+}
+
+/* Keep the default button style without any changes */
+.btn {
+  transition: box-shadow 0.3s ease, transform 0.3s ease; /* Ensure smooth transitions */
+}
+
+
+/* CSS Update for Real -Time Data Dashboards */
+/* General Styling for the Module Boxes */
+/* Flexbox for the Module Row */
+.module-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Ensure that there's space between the boxes */
+  gap: 20px; /* Add space between the boxes */
+}
+
+/* General Styling for the Module Boxes */
+.module-box {
+  background-color: #ffffff; /* Background color */
+  border-radius: 10px; /* Rounded corners */
+  padding: 20px; /* Padding inside the box */
+  width: 48%; /* Ensure two boxes per row (two 48% width boxes with gap in between) */
+  text-align: center; /* Align text to the center */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 2px solid #dcdcdc; /* Light border around the box */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle initial shadow */
+}
+
+.module-box:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Darker, more pronounced shadow */
+  border-color: #28a745; /* Green border color on hover */
+}
+
+/* Make sure it's responsive and adjusts in small screens */
+@media (max-width: 768px) {
+  .module-box {
+    width: 100%; /* Full width on smaller screens */
+  }
+}
+
+/* Style for the rounded Go Back to Dashboard icon */
+ 
+.back-icon {
+  background-color: #fff;  /* Set the background color */
+  color: #333; /* Set the color of the arrow */
+  padding: 8px; /* Add some padding around the icon */
+  border-radius: 50%; /* Make it circular */
+  display: inline-flex; /* Ensures the icon remains centered */
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease; /* Smooth transition */
+}
+
+/* Hover effect for the back icon */
+.back-icon:hover {
+  transform: scale(1.1); /* Slightly increase the size */
+  box-shadow: 0 0 8px 4px rgba(255, 105, 180, 0.7); /* Glow effect */
+  color: #ff69b4; /* Change the icon color on hover */
+  background-color: #333; /* Darken the background slightly */
+}

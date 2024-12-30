@@ -1,0 +1,120 @@
+/* RegisterPage.css */
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: white ;
+}
+
+.register-card {
+  background-color: #121212;
+  border-radius: 10px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.register-card:hover {
+  transform: translateY(-10px);
+  -webkit-box-shadow:0px 0px 138px 58px rgba(51,255,0,0.65);
+  -moz-box-shadow: 0px 0px 138px 58px rgba(51,255,0,0.65);
+  box-shadow: 0px 0px 138px 58px rgba(51,255,0,0.65);
+}
+
+.new-1{
+  color: #1ED760;
+}
+
+h4 {
+  color:   black;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-weight: bold;
+  color: #1DB954 ;
+}
+
+.form-control {
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #2575fc;
+  outline: none;
+}
+
+.msg{
+  color: #1ED760;
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+  75% {
+    transform: translateX(-10px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.shake {
+  animation: shake 0.5s ease-out;
+}
+
+.invalid-input {
+  border-color: #e74c3c !important; /* Red border for invalid input */
+}
+
+/* Invalid input message */
+.message {
+  color: #d9534f;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+button.register-btn {
+  background-color: #2575fc;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.register-btn:hover {
+  background-color: #6a11cb;
+}
+
+.login-link {
+  color: #2575fc;
+  text-decoration: none;
+}
+
+.login-link:hover {
+  color: aqua;
+}
