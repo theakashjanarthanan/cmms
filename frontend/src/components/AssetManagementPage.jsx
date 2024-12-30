@@ -1,9 +1,40 @@
-// frontend\src\components\AssetManagementPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Modal, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';  
+import { useNavigate } from 'react-router-dom';
+import {
+    Container,
+    Paper,
+    Typography,
+    TextField,
+    Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    IconButton,
+    Alert,
+    Box,
+    Chip,
+    Grid,
+    TablePagination
+} from '@mui/material';
+import {
+    Add as AddIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Visibility as ViewIcon,
+    Close as CloseIcon
+} from '@mui/icons-material';
 
 function AssetManagementPage() {
   const [assets, setAssets] = useState([]);
@@ -14,10 +45,11 @@ function AssetManagementPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  // Fetch all assets from the database
   useEffect(() => {
     const fetchAssets = async () => {
       try {
@@ -30,7 +62,6 @@ function AssetManagementPage() {
     fetchAssets();
   }, [message]);
 
-  // Handle Add Asset
   const addAsset = async () => {
     if (!assetName || !assetCode) {
       setMessage('Both Asset Name and Asset Code are required.');
@@ -52,7 +83,6 @@ function AssetManagementPage() {
     }
   };
 
-  // Handle Update Asset
   const updateAsset = async () => {
     if (!assetName || !assetCode) {
       setMessage('Both Asset Name and Asset Code are required.');
@@ -79,7 +109,6 @@ function AssetManagementPage() {
     }
   };
 
-  // Handle Delete Asset
   const deleteAsset = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/assets/${id}`);
@@ -90,7 +119,6 @@ function AssetManagementPage() {
     }
   };
 
-  // View Asset Modal
   const viewAsset = (asset) => {
     setSelectedAsset(asset);
     setAssetName(asset.assetName);
@@ -100,193 +128,224 @@ function AssetManagementPage() {
     setShowModal(true);
   };
 
-  // Edit Asset Modal
-  const editAsset = () => {
+  const editAsset = (asset) => {
+    setSelectedAsset(asset);
+    setAssetName(asset.assetName);
+    setAssetCode(asset.assetCode);
+    setAssetStatus(asset.assetStatus);
     setEditMode(true);
     setShowModal(true);
   };
 
-  // Hide Modal
-  const handleCloseModal = () => setShowModal(false);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditMode(false);
+    setAssetName('');
+    setAssetCode('');
+    setAssetStatus('Available');
+  };
 
-  // Function to get row color based on asset status
-  const getRowBackgroundColor = (status) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case 'Available':
-        return 'rgba(0, 128, 0, 0.2)'; // Transparent Green
+        return 'success';
       case 'In Use':
-        return 'rgba(255, 255, 0, 0.2)'; // Transparent Yellow
+        return 'warning';
       case 'Under Maintenance':
-        return 'rgba(255, 0, 0, 0.2)'; // Transparent Red
+        return 'error';
       default:
-        return '';
+        return 'default';
     }
   };
 
-  // Handle Go Back to Dashboard
-  const goBack = () => {
-    navigate('/dashboard'); // Use navigate() to go back to the dashboard
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
-    <div className="container mt-5">
-      {/* Go Back Button */}
-      <button className="btn btn-secondary mb-4" onClick={goBack}>
-          <i className="fas fa-arrow-left rounded-circle back-icon mr-2"></i> Go Back to Dashboard
-      </button>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+       <button className="btn btn-secondary mb-4" onClick={() => navigate('/dashboard')}>
+                <i className="fas fa-arrow-left rounded-circle back-icon mr-2"></i> Go Back to Dashboard
+        </button>
 
-      <div className="card p-4">
-        <h3>Asset Management</h3>
-        
-        {/* Display success/error messages */}
-        {message && (
-          <div className={`alert alert-info mt-2`}>{message}</div>
-        )}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>Asset Management</Typography>
+        {message && <Alert severity="info" sx={{ mb: 2 }}>{message}</Alert>}
 
-        {/* Add Asset Form */}
-        <div className="row mb-4">
-          <div className="col-md-4">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Asset Name"
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={4}>
+            <TextField
+              fullWidth
+              label="Asset Name"
               value={assetName}
               onChange={(e) => setAssetName(e.target.value)}
+              required
             />
-          </div>
-
-          <div className="col-md-4">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Asset Code"
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <TextField
+              fullWidth
+              label="Asset Code"
               value={assetCode}
               onChange={(e) => setAssetCode(e.target.value)}
+              required
             />
-          </div>
-
-          <div className="col-md-2">
-            <select
-              className="form-control"
-              value={assetStatus}
-              onChange={(e) => setAssetStatus(e.target.value)}
-            >
-              <option value="Available">Available</option>
-              <option value="In Use">In Use</option>
-              <option value="Under Maintenance">Under Maintenance</option>
-            </select>
-          </div>
-
-          <div className="col-md-2">
-            <button
-              className="btn btn-success"
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={assetStatus}
+                label="Status"
+                onChange={(e) => setAssetStatus(e.target.value)}
+              >
+                <MenuItem value="Available">Available</MenuItem>
+                <MenuItem value="In Use">In Use</MenuItem>
+                <MenuItem value="Under Maintenance">Under Maintenance</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <Button
+              fullWidth
+              variant="contained"
+              startIcon={<AddIcon />}
               onClick={addAsset}
-              style={{ width: '100%' }}
             >
               Add Asset
-            </button>
-          </div>
-        </div>
-
-        {/* Display Assets in Table */}
-        <div className="mt-4">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Asset Name</th>
-                <th>Asset Code</th>
-                <th>Asset Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {assets.map((asset) => (
-                <tr
-                  key={asset._id}
-                  style={{ backgroundColor: getRowBackgroundColor(asset.assetStatus) }}
-                >
-                  <td>{asset.assetName}</td>
-                  <td>{asset.assetCode}</td>
-                  <td>
-                    <span className={`badge ${
-                      asset.assetStatus === 'Available' ? 'bg-success' :
-                      asset.assetStatus === 'In Use' ? 'bg-warning' : 'bg-danger'
-                    }`}>
-                      {asset.assetStatus}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-info mr-2"
-                      onClick={() => viewAsset(asset)}
-                    >
-                      View
-                    </button>
-                    <button
-                      className="btn btn-warning mr-2"
-                      onClick={() => editAsset(asset)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => deleteAsset(asset._id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* View/Edit Asset Modal */}
-        <Modal show={showModal} onHide={handleCloseModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>{editMode ? 'Edit Asset' : 'Asset Details'}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div>
-              <input
-                type="text"
-                className="form-control mb-2"
-                value={assetName}
-                onChange={(e) => setAssetName(e.target.value)}
-                disabled={!editMode}
-              />
-              <input
-                type="text"
-                className="form-control mb-2"
-                value={assetCode}
-                onChange={(e) => setAssetCode(e.target.value)}
-                disabled={!editMode}
-              />
-              <select
-                className="form-control mb-2"
-                value={assetStatus}
-                onChange={(e) => setAssetStatus(e.target.value)}
-                disabled={!editMode}
-              >
-                <option value="Available">Available</option>
-                <option value="In Use">In Use</option>
-                <option value="Under Maintenance">Under Maintenance</option>
-              </select>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Close
             </Button>
-            {editMode && (
-              <Button variant="primary" onClick={updateAsset}>
-                Save Changes
-              </Button>
-            )}
-          </Modal.Footer>
-        </Modal>
-      </div>
-    </div>
+          </Grid>
+        </Grid>
+
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Asset Name</TableCell>
+                <TableCell>Asset Code</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {assets
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((asset) => (
+                  <TableRow key={asset._id}>
+                    <TableCell>{asset.assetName}</TableCell>
+                    <TableCell>{asset.assetCode}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={asset.assetStatus}
+                        color={getStatusColor(asset.assetStatus)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => viewAsset(asset)}
+                        color="info"
+                      >
+                        <ViewIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => editAsset(asset)}
+                        color="warning"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => deleteAsset(asset._id)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={assets.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </Paper>
+
+      <Dialog open={showModal} onClose={handleCloseModal} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {editMode ? 'Edit Asset' : 'Asset Details'}
+          <IconButton
+            onClick={handleCloseModal}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Asset Name"
+                  value={assetName}
+                  onChange={(e) => setAssetName(e.target.value)}
+                  disabled={!editMode}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Asset Code"
+                  value={assetCode}
+                  onChange={(e) => setAssetCode(e.target.value)}
+                  disabled={!editMode}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={assetStatus}
+                    label="Status"
+                    onChange={(e) => setAssetStatus(e.target.value)}
+                    disabled={!editMode}
+                  >
+                    <MenuItem value="Available">Available</MenuItem>
+                    <MenuItem value="In Use">In Use</MenuItem>
+                    <MenuItem value="Under Maintenance">Under Maintenance</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal}>Close</Button>
+          {editMode && (
+            <Button onClick={updateAsset} variant="contained">
+              Save Changes
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 }
 

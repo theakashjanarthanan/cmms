@@ -1,12 +1,43 @@
-//frontend\src\components\RequestsPage.jsx
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Alert,
+  Box,
+  Chip,
+  Grid,
+  TablePagination
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
 
 const RequestForm = () => {
-  const navigate = useNavigate();  
-
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Low');
@@ -17,7 +48,8 @@ const RequestForm = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showRequests, setShowRequests] = useState(false);  
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const fetchRequests = async () => {
     try {
@@ -90,278 +122,330 @@ const RequestForm = () => {
   const handleDeleteRequest = async (requestId) => {
     try {
       await axios.delete(`http://localhost:5000/api/requests/${requestId}`);
-      // Remove the deleted request from the state to update the UI
       setRequests(requests.filter((request) => request._id !== requestId));
     } catch (error) {
       setError('Error deleting the request');
     }
   };
 
-  const getPriorityBadge = (priority) => {
+  const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'Low':
-        return <span className="badge bg-success">{priority}</span>;
-      case 'Medium':
-        return <span className="badge bg-warning">{priority}</span>;
       case 'High':
-        return <span className="badge bg-danger">{priority}</span>;
+        return 'error';
+      case 'Medium':
+        return 'warning';
       default:
-        return <span className="badge bg-secondary">{priority}</span>;
+        return 'success';
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pending':
+        return 'warning';
+      case 'In Progress':
+        return 'info';
+      case 'Completed':
+        return 'success';
+      default:
+        return 'default';
+    }
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
-    <div className="container mt-5">
-      {/* Go Back Button */}
-       <button className="btn btn-secondary mb-4" onClick={() => navigate('/dashboard')}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <button className="btn btn-secondary mb-4" onClick={() => navigate('/dashboard')}>
                 <i className="fas fa-arrow-left rounded-circle back-icon mr-2"></i> Go Back to Dashboard
-       </button>
+           </button>
 
-      {/* Request Submission Form */}
-      <div className="card p-4">
-        <h2 className="text-center mb-4">Request Management</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>Request Management</Typography>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
         <form onSubmit={handleSubmit}>
-          
-          {/* Form Fields */}
-          <div className="mb-3">
-            <label htmlFor="title" className="form-label">Request Title</label>
-            <input
-              placeholder='Enter the title'
-              type="text"
-              id="title"
-              className="form-control"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="description" className="form-label">Description</label>
-            <textarea
-              placeholder='Enter the description'
-              id="description"
-              className="form-control"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="priority" className="form-label">Priority</label>
-            <select
-              id="priority"
-              className="form-select"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-            >
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="status" className="form-label">Status</label>
-            <select
-              id="status"
-              className="form-select"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="assignedTo" className="form-label">Assigned To</label>
-            <input
-              type="text"
-              id="assignedTo"
-              className="form-control"
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
-            />
-          </div>
-
-          <button type="submit" className="btn btn-primary w-100">Submit Request</button>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Request Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Description"
+                multiline
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  value={priority}
+                  label="Priority"
+                  onChange={(e) => setPriority(e.target.value)}
+                >
+                  <MenuItem value="Low">Low</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="High">High</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={status}
+                  label="Status"
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <MenuItem value="Pending">Pending</MenuItem>
+                  <MenuItem value="In Progress">In Progress</MenuItem>
+                  <MenuItem value="Completed">Completed</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Assigned To"
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                variant="contained"
+                startIcon={<AddIcon />}
+                fullWidth
+              >
+                Submit Request
+              </Button>
+            </Grid>
+          </Grid>
         </form>
-      </div>
+      </Paper>
 
-      {/* Button to Toggle Table Visibility */}
-      <button
-        className="btn btn-secondary mt-4 d-flex mx-auto"
-        onClick={() => setShowRequests((prev) => !prev)}  // Toggle visibility of table
-      >
-        {showRequests ? 'Hide Requests' : 'Show Requests'}
-      </button>
-
-      {/* Requests List Table */}
-      {showRequests && (
-        <div className="table-responsive mt-4">
-          <table className="table table-striped table-bordered">
-            <thead>
-              <tr>
-                <th>Request Title</th>
-                <th>Description</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Assigned To</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {requests.length > 0 ? (
-                requests.map((request) => (
-                  <tr key={request._id}>
-                    <td>{request.title}</td>
-                    <td>{request.description}</td>
-                    <td>{getPriorityBadge(request.priority)}</td>
-                    <td>{request.status}</td>
-                    <td>{request.assignedTo}</td>
-                    <td>
-                      <button
-                        className="btn btn-warning"
-                        onClick={() => handleEdit(request)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn-info ms-2"
+      <Paper sx={{ mb: 3, p: 2 }} elevation={3}>
+        <Typography variant="h6" sx={{ mb: 2 }}>All Requests</Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Title</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Priority</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Assigned To</TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {requests
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((request) => (
+                  <TableRow key={request._id}>
+                    <TableCell>{request.title}</TableCell>
+                    <TableCell>{request.description}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={request.priority}
+                        color={getPriorityColor(request.priority)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={request.status}
+                        color={getStatusColor(request.status)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{request.assignedTo}</TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
                         onClick={() => handleViewRequest(request)}
+                        color="info"
                       >
-                        View
-                      </button>
-                      <button
-                        className="btn btn-danger ms-2"
-                        onClick={() => handleDeleteRequest(request._id)} // Delete request
+                        <ViewIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEdit(request)}
+                        color="warning"
                       >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center">No requests yet.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteRequest(request._id)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={requests.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </Paper>
 
-      {/* View Modal */}
-      {showViewModal && selectedRequest && (
-        <div className="modal fade show" style={{ display: 'block' }} role="dialog">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Request Summary</h5>
-                <button type="button" className="close" onClick={() => setShowViewModal(false)}>
-                  &times;
-                </button>
-              </div>
-              <div className="modal-body">
-                <h4>{selectedRequest.title}</h4>
-                <p><strong>Description:</strong> {selectedRequest.description}</p>
-                <p><strong>Priority:</strong> {selectedRequest.priority}</p>
-                <p><strong>Status:</strong> {selectedRequest.status}</p>
-                <p><strong>Assigned To:</strong> {selectedRequest.assignedTo}</p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowViewModal(false)}>Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog open={showViewModal} onClose={() => setShowViewModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Request Details
+          <IconButton
+            onClick={() => setShowViewModal(false)}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {selectedRequest && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Title:</strong> {selectedRequest.title}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                <strong>Description:</strong> {selectedRequest.description}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                <strong>Priority:</strong>{' '}
+                <Chip
+                  label={selectedRequest.priority}
+                  color={getPriorityColor(selectedRequest.priority)}
+                  size="small"
+                />
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                <strong>Status:</strong>{' '}
+                <Chip
+                  label={selectedRequest.status}
+                  color={getStatusColor(selectedRequest.status)}
+                  size="small"
+                />
+              </Typography>
+              <Typography variant="body1">
+                <strong>Assigned To:</strong> {selectedRequest.assignedTo}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowViewModal(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
-      {/* Edit Modal */}
-      {showEditModal && selectedRequest && (
-        <div className="modal fade show" style={{ display: 'block' }} role="dialog">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Request</h5>
-                <button type="button" className="close" onClick={() => setShowEditModal(false)}>
-                  &times;
-                </button>
-              </div>
-              <div className="modal-body">
-                <form onSubmit={handleUpdateRequest}>
-                  <div className="mb-3">
-                    <label htmlFor="title" className="form-label">Request Title</label>
-                    <input
-                      type="text"
-                      id="title"
-                      className="form-control"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="description" className="form-label">Description</label>
-                    <textarea
-                      id="description"
-                      className="form-control"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="priority" className="form-label">Priority</label>
-                    <select
-                      id="priority"
-                      className="form-select"
-                      value={priority}
-                      onChange={(e) => setPriority(e.target.value)}
-                    >
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="status" className="form-label">Status</label>
-                    <select
-                      id="status"
-                      className="form-select"
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value)}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="assignedTo" className="form-label">Assigned To</label>
-                    <input
-                      type="text"
-                      id="assignedTo"
-                      className="form-control"
-                      value={assignedTo}
-                      onChange={(e) => setAssignedTo(e.target.value)}
-                    />
-                  </div>
-                  <button type="submit" className="btn btn-primary w-100">Update Request</button>
-                </form>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <Dialog open={showEditModal} onClose={() => setShowEditModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Edit Request
+          <IconButton
+            onClick={() => setShowEditModal(false)}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleUpdateRequest} sx={{ mt: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  multiline
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Priority</InputLabel>
+                  <Select
+                    value={priority}
+                    label="Priority"
+                    onChange={(e) => setPriority(e.target.value)}
+                  >
+                    <MenuItem value="Low">Low</MenuItem>
+                    <MenuItem value="Medium">Medium</MenuItem>
+                    <MenuItem value="High">High</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={status}
+                    label="Status"
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <MenuItem value="Pending">Pending</MenuItem>
+                    <MenuItem value="In Progress">In Progress</MenuItem>
+                    <MenuItem value="Completed">Completed</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Assigned To"
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                />
+              </Grid>
+            </Grid>
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button onClick={() => setShowEditModal(false)} sx={{ mr: 1 }}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="contained">
+                Update Request
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </Container>
   );
 };
 

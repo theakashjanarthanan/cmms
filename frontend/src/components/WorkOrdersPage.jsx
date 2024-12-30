@@ -2,10 +2,44 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';   
+import { useNavigate } from 'react-router-dom';
+import {
+    Container,
+    Paper,
+    Typography,
+    TextField,
+    Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    IconButton,
+    Alert,
+    Box,
+    Chip,
+    Grid,
+    TablePagination
+} from '@mui/material';
+import {
+    Add as AddIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Visibility as ViewIcon,
+    Close as CloseIcon
+} from '@mui/icons-material';
 
 const WorkOrdersPage = () => {
-    const navigate = useNavigate();  
+    const navigate = useNavigate();
     const [workOrders, setWorkOrders] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -15,9 +49,11 @@ const WorkOrdersPage = () => {
     const [editMode, setEditMode] = useState(false);
     const [currentWorkOrderId, setCurrentWorkOrderId] = useState(null);
     const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
-    const [showEditModal, setShowEditModal] = useState(false);  
+    const [showEditModal, setShowEditModal] = useState(false);
 
-    // Fetch all work orders
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
     useEffect(() => {
         async function fetchWorkOrders() {
             try {
@@ -30,11 +66,9 @@ const WorkOrdersPage = () => {
         fetchWorkOrders();
     }, []);
 
-    // Handle Create or Edit Work Order
     const handleSave = async (e) => {
         e.preventDefault();
 
-//  prevent accidental submission of incomplete or invalid data.
         if (!title.trim() || !description.trim()) {
             setMessage('Title and Description cannot be empty.');
             return;
@@ -44,16 +78,13 @@ const WorkOrdersPage = () => {
 
         try {
             if (editMode) {
-                // Edit existing work order
                 await axios.put(`http://localhost:5000/api/workorders/${currentWorkOrderId}`, workOrder);
                 setMessage('Work Order Updated Successfully!');
             } else {
-                // Create new work order
                 await axios.post('http://localhost:5000/api/workorders', workOrder);
                 setMessage('Work Order Created Successfully!');
             }
 
-            // Reset form and refresh the list
             setTitle('');
             setDescription('');
             setPriority('Low');
@@ -63,19 +94,17 @@ const WorkOrdersPage = () => {
 
             const response = await axios.get('http://localhost:5000/api/workorders');
             setWorkOrders(response.data);
-            setShowEditModal(false); // Close the edit modal after save
+            setShowEditModal(false);
         } catch (error) {
             setMessage('Failed to save work order.');
             console.error(error);
         }
     };
 
-    // Handle Delete Work Order
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://localhost:5000/api/workorders/${id}`);
             setMessage('Work Order Deleted Successfully!');
-            // Refresh list after deletion
             const response = await axios.get('http://localhost:5000/api/workorders');
             setWorkOrders(response.data);
         } catch (error) {
@@ -84,7 +113,6 @@ const WorkOrdersPage = () => {
         }
     };
 
-    // Handle Edit Click
     const handleEdit = (workOrder) => {
         setEditMode(true);
         setCurrentWorkOrderId(workOrder._id);
@@ -92,362 +120,326 @@ const WorkOrdersPage = () => {
         setDescription(workOrder.description);
         setPriority(workOrder.priority);
         setStatus(workOrder.status);
-        setShowEditModal(true); // Show the edit modal
+        setShowEditModal(true);
     };
 
-    
-
-
- // Handle View Popup Click
     const handleView = (workOrder) => {
-        setSelectedWorkOrder(workOrder); // set the work order to view in popup
+        setSelectedWorkOrder(workOrder);
     };
 
     const closePopup = () => {
-        setSelectedWorkOrder(null); // Close the popup
+        setSelectedWorkOrder(null);
     };
 
-    // Conditional styling for priority and status
-    const getPriorityClass = (priority) => {
-        if (priority === 'High') return 'list-group-item-danger';
-        if (priority === 'Medium') return 'list-group-item-warning';
-        return 'list-group-item-success'; // Low priority
+    const getPriorityColor = (priority) => {
+        switch (priority) {
+            case 'High':
+                return 'error';
+            case 'Medium':
+                return 'warning';
+            default:
+                return 'success';
+        }
     };
 
-    const getStatusClass = (status) => {
-        if (status === 'Pending') return 'badge bg-primary';
-        if (status === 'In Progress') return 'badge bg-info';
-        return 'badge bg-success'; // Completed
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Pending':
+                return 'warning';
+            case 'In Progress':
+                return 'info';
+            case 'Completed':
+                return 'success';
+            default:
+                return 'default';
+        }
     };
 
-    // Conditional Background color based on the status
-    const getStatusBackgroundColor = (status) => {
-        if (status === 'Pending') return 'rgba(255, 0, 0, 0.2)'; // Red transparent
-        if (status === 'In Progress') return 'rgba(255, 255, 0, 0.2)'; // Yellow transparent
-        return 'rgba(0, 255, 0, 0.2)'; // Green transparent
-    };
+    const WorkOrderTable = ({ title, orders }) => {
+        const handleChangePage = (event, newPage) => {
+            setPage(newPage);
+        };
 
-  
+        const handleChangeRowsPerPage = (event) => {
+            setRowsPerPage(parseInt(event.target.value, 10));
+            setPage(0);
+        };
+
+        return (
+            <Paper sx={{ mb: 3, p: 2 }} elevation={3}>
+                <Typography variant="h6" sx={{ mb: 2 }}>{title}</Typography>
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Title</TableCell>
+                                <TableCell>Status</TableCell>
+                                <TableCell>Priority</TableCell>
+                                <TableCell align="right">Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {orders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((workOrder) => (
+                                <TableRow key={workOrder._id}>
+                                    <TableCell>{workOrder.title}</TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={workOrder.status}
+                                            color={getStatusColor(workOrder.status)}
+                                            size="small"
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip
+                                            label={workOrder.priority}
+                                            color={getPriorityColor(workOrder.priority)}
+                                            size="small"
+                                        />
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleView(workOrder)}
+                                            color="info"
+                                        >
+                                            <ViewIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleEdit(workOrder)}
+                                            color="warning"
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleDelete(workOrder._id)}
+                                            color="error"
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={orders.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Paper>
+        );
+    };
 
     return (
-        
-        <div className="container mt-5">
-           {/* Go Back Button */}
-           <button className="btn btn-secondary mb-4" onClick={() => navigate('/dashboard')}>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <button className="btn btn-secondary mb-4" onClick={() => navigate('/dashboard')}>
                 <i className="fas fa-arrow-left rounded-circle back-icon mr-2"></i> Go Back to Dashboard
            </button>
 
-            {/* Work Orders Page Content Inside a Card */}
-            <div className="card p-4  ">
-                <h2>Work Orders</h2>
-                {message && <div className="alert alert-info">{message}</div>}
+            <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+                <Typography variant="h4" gutterBottom>Work Orders Management</Typography>
+                {message && <Alert severity="info" sx={{ mb: 2 }}>{message}</Alert>}
 
-                {/* Work Order Form */}
-                <form onSubmit={handleSave} className="mb-4">
-                <label className="me-3" style={{ minWidth: '80px' }}>Title:</label>
-                    <input
-                        type="text"
-                       className="form-control mb-2"
-                        placeholder="Title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                    />
-
-                    <label className="me-3" style={{ minWidth: '80px' }}>Description:</label>
-                    <textarea
-                        className="form-control mb-2"
-                        placeholder="Description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                    ></textarea>
-
-                    <label className="me-3" style={{ minWidth: '80px' }}>Priority:</label>
-                    <div className="form-row">
-                        <div className="col">
-                            <select
-                                className="form-control mb-2"
-                                value={priority}
-                                onChange={(e) => setPriority(e.target.value)}
-                                
+                <form onSubmit={handleSave}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth
+                                label="Description"
+                                multiline
+                                rows={4}
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Priority</InputLabel>
+                                <Select
+                                    value={priority}
+                                    label="Priority"
+                                    onChange={(e) => setPriority(e.target.value)}
+                                >
+                                    <MenuItem value="Low">Low</MenuItem>
+                                    <MenuItem value="Medium">Medium</MenuItem>
+                                    <MenuItem value="High">High</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Status</InputLabel>
+                                <Select
+                                    value={status}
+                                    label="Status"
+                                    onChange={(e) => setStatus(e.target.value)}
+                                >
+                                    <MenuItem value="Pending">Pending</MenuItem>
+                                    <MenuItem value="In Progress">In Progress</MenuItem>
+                                    <MenuItem value="Completed">Completed</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                startIcon={editMode ? <EditIcon /> : <AddIcon />}
                             >
-                                 <option  value="" disabled >
-                                    Select Priority
-                                </option>
-                                <option>Low</option>
-                                <option>Medium</option>
-                                <option>High</option>
-                            </select>
-                        </div>
-
-                        <label className="me-3" style={{ minWidth: '80px' }}>Status:</label>
-                        <div className="col">
-                            <select
-                                className="form-control mb-2"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                            >
-                                 <option  value="" disabled >
-                                    Select Status
-                                </option>
-                                <option>Pending </option>
-                                <option>In Progress</option>
-                                <option>Completed</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" className="btn btn-primary">
-                        {editMode ? 'Update Work Order' : 'Create Work Order'}
-                    </button>
+                                {editMode ? 'Update Work Order' : 'Create Work Order'}
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </form>
+            </Paper>
 
-                {/* Display Work Orders in Tables */}
+            <WorkOrderTable
+                title="Pending Work Orders"
+                orders={workOrders.filter(wo => wo.status === 'Pending')}
+            />
+            <WorkOrderTable
+                title="In Progress Work Orders"
+                orders={workOrders.filter(wo => wo.status === 'In Progress')}
+            />
+            <WorkOrderTable
+                title="Completed Work Orders"
+                orders={workOrders.filter(wo => wo.status === 'Completed')}
+            />
 
-                {/* Pending Work Orders Table */}
-                <div className="my-4">
-                    <h4>Pending Work Orders</h4>
-                    <table className="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {workOrders
-                                .filter((workOrder) => workOrder.status === 'Pending')
-                                .map((workOrder) => (
-                                    <tr
-                                        key={workOrder._id}
-                                        style={{ backgroundColor: getStatusBackgroundColor(workOrder.status) }} // Apply background color here
+            <Dialog open={!!selectedWorkOrder} onClose={closePopup} maxWidth="sm" fullWidth>
+                <DialogTitle>
+                    Work Order Details
+                    <IconButton
+                        onClick={closePopup}
+                        sx={{ position: 'absolute', right: 8, top: 8 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    {selectedWorkOrder && (
+                        <Box sx={{ mt: 2 }}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                <strong>Title:</strong> {selectedWorkOrder.title}
+                            </Typography>
+                            <Typography variant="body1" gutterBottom>
+                                <strong>Description:</strong> {selectedWorkOrder.description}
+                            </Typography>
+                            <Typography variant="body1" gutterBottom>
+                                <strong>Priority:</strong>{' '}
+                                <Chip
+                                    label={selectedWorkOrder.priority}
+                                    color={getPriorityColor(selectedWorkOrder.priority)}
+                                    size="small"
+                                />
+                            </Typography>
+                            <Typography variant="body1">
+                                <strong>Status:</strong>{' '}
+                                <Chip
+                                    label={selectedWorkOrder.status}
+                                    color={getStatusColor(selectedWorkOrder.status)}
+                                    size="small"
+                                />
+                            </Typography>
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closePopup}>Close</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog open={showEditModal} onClose={() => setShowEditModal(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>
+                    Edit Work Order
+                    <IconButton
+                        onClick={() => setShowEditModal(false)}
+                        sx={{ position: 'absolute', right: 8, top: 8 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <Box component="form" onSubmit={handleSave} sx={{ mt: 2 }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="Title"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="Description"
+                                    multiline
+                                    rows={4}
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    required
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Priority</InputLabel>
+                                    <Select
+                                        value={priority}
+                                        label="Priority"
+                                        onChange={(e) => setPriority(e.target.value)}
                                     >
-                                        <td>{workOrder.title}</td>
-                                        <td><span className={getStatusClass(workOrder.status)}>{workOrder.status}</span></td>
-                                        <td><span className={getPriorityClass(workOrder.priority)}>{workOrder.priority}</span></td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleView(workOrder)}
-                                                className="btn btn-info btn-sm me-2"
-                                            >
-                                                View
-                                            </button>
-                                            <button
-                                                onClick={() => handleEdit(workOrder)}
-                                                className="btn btn-warning btn-sm me-2"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(workOrder._id)}
-                                                className="btn btn-danger btn-sm"
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* In Progress Work Orders Table */}
-                <div className="my-4">
-                    <h4>In Progress Work Orders</h4>
-                    <table className="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {workOrders
-                                .filter((workOrder) => workOrder.status === 'In Progress')
-                                .map((workOrder) => (
-                                    <tr
-                                        key={workOrder._id}
-                                        style={{ backgroundColor: getStatusBackgroundColor(workOrder.status) }}
+                                        <MenuItem value="Low">Low</MenuItem>
+                                        <MenuItem value="Medium">Medium</MenuItem>
+                                        <MenuItem value="High">High</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Status</InputLabel>
+                                    <Select
+                                        value={status}
+                                        label="Status"
+                                        onChange={(e) => setStatus(e.target.value)}
                                     >
-                                        <td>{workOrder.title}</td>
-                                        <td><span className={getStatusClass(workOrder.status)}>{workOrder.status}</span></td>
-                                        <td><span className={getPriorityClass(workOrder.priority)}>{workOrder.priority}</span></td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleView(workOrder)}
-                                                className="btn btn-info btn-sm me-2"
-                                            >
-                                                View
-                                            </button>
-                                            <button
-                                                onClick={() => handleEdit(workOrder)}
-                                                className="btn btn-warning btn-sm me-2"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(workOrder._id)}
-                                                className="btn btn-danger btn-sm"
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Completed Work Orders Table */}
-                <div className="my-4">
-                    <h4>Completed  Work Orders</h4>
-                    <table className="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {workOrders
-                                .filter((workOrder) => workOrder.status === 'Completed')
-                                .map((workOrder) => (
-                                    <tr
-                                        key={workOrder._id}
-                                        style={{ backgroundColor: getStatusBackgroundColor(workOrder.status) }}
-                                    >
-                                        <td>{workOrder.title}</td>
-                                        <td><span className={getStatusClass(workOrder.status)}>{workOrder.status}</span></td>
-                                        <td><span className={getPriorityClass(workOrder.priority)}>{workOrder.priority}</span></td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleView(workOrder)}
-                                                className="btn btn-info btn-sm me-2"
-                                            >
-                                                View
-                                            </button>
-                                            <button
-                                                onClick={() => handleEdit(workOrder)}
-                                                className="btn btn-warning btn-sm me-2"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(workOrder._id)}
-                                                className="btn btn-danger btn-sm"
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Work Order View Modal */}
-                            {selectedWorkOrder && (
-                    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Work Order Details</h5>
-                                    <button type="button" className="close" onClick={closePopup}>
-                                        <span>&times;</span>
-                                    </button>
-                                </div>
-                                <div className="modal-body">
-                                    <p><strong>Title:</strong> {selectedWorkOrder.title}</p>
-                                    <p><strong>Description:</strong> {selectedWorkOrder.description}</p>
-                                    <p><strong>Priority:</strong> {selectedWorkOrder.priority}</p>
-                                    <p><strong>Status:</strong> {selectedWorkOrder.status}</p>
-                                </div>
-                                <div className="modal-footer">
-                                    <button className="btn btn-secondary" onClick={closePopup}>
-                                        Close
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-            {/* Edit Modal */}
-            {showEditModal && (
-                                <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog">
-                                    <div className="modal-dialog modal-dialog-centered">
-                                        <div className="modal-content">
-                                            <div className="modal-header">
-                                                <h5 className="modal-title">Edit Work Order</h5>
-                                                <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close" onClick={() => setShowEditModal(false)}>
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div className="modal-body">
-                                                <form onSubmit={handleSave}>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control mb-2"
-                                                        placeholder="Title"
-                                                        value={title}
-                                                        onChange={(e) => setTitle(e.target.value)}
-                                                        required
-                                                    />
-                                                    <textarea
-                                                        className="form-control mb-2"
-                                                        placeholder="Description"
-                                                        value={description}
-                                                        onChange={(e) => setDescription(e.target.value)}
-                                                        required
-                                                    ></textarea>
-                                                    <div className="form-row">
-                                                        <div className="col">
-                                                            <select
-                                                                className="form-control mb-2"
-                                                                value={priority}
-                                                                onChange={(e) => setPriority(e.target.value)}
-                                                            >
-                                                                <option>Low</option>
-                                                                <option>Medium</option>
-                                                                <option>High</option>
-                                                            </select>
-                                                        </div>
-                                                        <div className="col">
-                                                            <select
-                                                                className="form-control mb-2"
-                                                                value={status}
-                                                                onChange={(e) => setStatus(e.target.value)}
-                                                            >
-                                                                <option>Pending </option>
-                                                                <option>In Progress</option>
-                                                                <option>Completed</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <button type="submit" className="btn btn-primary">
-                                                        Update Work Order
-                                                    </button>
-                                                </form>
-                                            </div>
-                                            <div className="modal-footer">
-                                                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>
-                                                    Close
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-        </div>
+                                        <MenuItem value="Pending">Pending</MenuItem>
+                                        <MenuItem value="In Progress">In Progress</MenuItem>
+                                        <MenuItem value="Completed">Completed</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                        </Grid>
+                        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button onClick={() => setShowEditModal(false)} sx={{ mr: 1 }}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" variant="contained">
+                                Update Work Order
+                            </Button>
+                        </Box>
+                    </Box>
+                </DialogContent>
+            </Dialog>
+        </Container>
     );
 };
 
