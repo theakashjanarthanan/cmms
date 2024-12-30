@@ -40,6 +40,13 @@ cd backend
 npm install
 ```
 
+#### Configure .env File 
+Navigate to the `backend` folder and rename `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
 #### Frontend Dependencies
 Next, navigate to the `frontend` folder and install the required dependencies:
 
